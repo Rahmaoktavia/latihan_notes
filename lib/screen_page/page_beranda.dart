@@ -190,12 +190,16 @@ class _NotesScreenState extends State<NotesScreen> {
               onPressed: () async {
                 try {
                   final response = await http.delete(
-                    Uri.parse(
-                        'http://192.168.156.142/notes/deleteNote.php?id=${note.id}'),
+                    Uri.parse('http://192.168.156.142/notes/deleteNote.php?id=${note.id}'),
                   );
                   if (response.statusCode == 200) {
-                    fetchNotes(); // Refresh notes list after deleting
-                    Navigator.pop(context);
+                    var responseData = json.decode(response.body);
+                    if (responseData['is_success']) {
+                      fetchNotes(); // Refresh notes list after deleting
+                      Navigator.pop(context);
+                    } else {
+                      _showErrorSnackBar(responseData['message']);
+                    }
                   } else {
                     _showErrorSnackBar('Failed to delete note');
                   }
@@ -209,6 +213,7 @@ class _NotesScreenState extends State<NotesScreen> {
       },
     );
   }
+
 
   void showDetailScreen(Datum note) {
     Navigator.push(
